@@ -97,20 +97,20 @@ func ReadBaseMessage(r *bufio.Reader) ([]byte, error) {
 // Extracts and returns the content length.
 func readContentLengthHeader(r *bufio.Reader) (contentLength int64, err error) {
 	// Look for <some header>\r\n\r\n
-	headerWithCr, err := r.ReadString('\r')
+	headerWithCr, err := r.ReadString('\n')
 	if err != nil {
 		return 0, err
 	}
-	nextThree := make([]byte, 3)
-	if _, err = io.ReadFull(r, nextThree); err != nil {
+	nextTwo := make([]byte, 2)
+	if _, err = io.ReadFull(r, nextTwo); err != nil {
 		return 0, err
 	}
-	if string(nextThree) != "\n\r\n" {
+	if string(nextTwo) != "\r\n" {
 		return 0, ErrHeaderDelimiterNotCrLfCrLf
 	}
 
 	// If header is in the right format, get the length
-	header := strings.TrimSuffix(headerWithCr, "\r")
+	header := strings.TrimSuffix(headerWithCr, "\r\n")
 	headerAndLength := contentLengthHeaderRegex.FindStringSubmatch(header)
 	if len(headerAndLength) < 2 {
 		return 0, ErrHeaderNotContentLength
