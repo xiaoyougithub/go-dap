@@ -24,7 +24,7 @@ func NewResponse(request RequestMessage) Response {
 
 func NewErrorResponse(request RequestMessage, message string) *ErrorResponse {
 	er := &ErrorResponse{}
-	er.Response = newResponse(request)
+	er.Response = NewResponse(request)
 	er.Success = false
 	er.Message = message
 	er.Body.Error.Format = message
