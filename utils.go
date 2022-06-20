@@ -1,6 +1,6 @@
 package dap
 
-func newEvent(event string) Event {
+func NewEvent(event string) Event {
 	return Event{
 		ProtocolMessage: ProtocolMessage{
 			Seq:  0,
@@ -10,7 +10,7 @@ func newEvent(event string) Event {
 	}
 }
 
-func newResponse(request RequestMessage) Response {
+func NewResponse(request RequestMessage) Response {
 	return Response{
 		ProtocolMessage: ProtocolMessage{
 			Seq:  0,
@@ -22,7 +22,7 @@ func newResponse(request RequestMessage) Response {
 	}
 }
 
-func newErrorResponse(request RequestMessage, message string) *ErrorResponse {
+func NewErrorResponse(request RequestMessage, message string) *ErrorResponse {
 	er := &ErrorResponse{}
 	er.Response = newResponse(request)
 	er.Success = false
