@@ -1,5 +1,15 @@
 package dap
 
+func NewRequest(seq int, command string) Request {
+	return Request{
+		ProtocolMessage: ProtocolMessage{
+			Type: "request",
+			Seq:  seq,
+		},
+		Command: command,
+	}
+}
+
 func NewEvent(event string) Event {
 	return Event{
 		ProtocolMessage: ProtocolMessage{
