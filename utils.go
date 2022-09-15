@@ -1,10 +1,10 @@
 package dap
 
-func NewRequest(seq int, command string) Request {
+func NewRequest(command string) Request {
 	return Request{
 		ProtocolMessage: ProtocolMessage{
 			Type: "request",
-			Seq:  seq,
+			Seq:  0,
 		},
 		Command: command,
 	}
