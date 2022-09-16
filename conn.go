@@ -3,6 +3,7 @@ package dap
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"io"
 	"sync/atomic"
 )
@@ -24,7 +25,6 @@ func NewConn(io io.ReadWriter, handler Handler) *Conn {
 	return conn
 }
 
-// 处理请求和事件
 type Handler interface {
 	Handle(*Conn, Message)
 }
@@ -34,13 +34,17 @@ func (conn *Conn) SendRequest(request RequestMessage, response ResponseMessage) 
 	request.GetRequest().Seq = int(atomic.AddInt64(&conn.seq, 1))
 	await := make(chan []byte, 1)
 	conn.awaitMap[request.GetSeq()] = await
-	if err := conn.Send(request); err != nil {
+	defer func() {
 		close(await)
 		delete(conn.awaitMap, request.GetSeq())
+	}()
+	if err := conn.Send(request); err != nil {
 		return err
 	}
 	message := <-await
-	close(await)
+	if message == nil {
+		return errors.New("conn close")
+	}
 	return json.Unmarshal(message, response)
 }
 
@@ -63,14 +67,19 @@ func (conn *Conn) Run() {
 		}
 		switch message := message.(type) {
 		case ResponseMessage:
-			if await, ok := conn.awaitMap[message.GetSeq()]; ok {
+			seq := message.GetResponse().RequestSeq
+			if await, ok := conn.awaitMap[seq]; ok {
 				await <- content
-				delete(conn.awaitMap, message.GetSeq())
-			}
-		default:
-			if conn.handler != nil {
-				conn.handler.Handle(conn, message)
+				delete(conn.awaitMap, seq)
+				continue
 			}
 		}
+		if conn.handler != nil {
+			conn.handler.Handle(conn, message)
+		}
+	}
+	for k, v := range conn.awaitMap {
+		v <- nil
+		delete(conn.awaitMap, k)
 	}
 }
