@@ -31,10 +31,12 @@ type Handler interface {
 
 // 阻塞等待结果
 func (conn *Conn) SendRequest(request RequestMessage, response ResponseMessage) error {
+	oldSeq := request.GetSeq()
 	request.GetRequest().Seq = int(atomic.AddInt64(&conn.seq, 1))
 	await := make(chan []byte, 1)
 	conn.awaitMap[request.GetSeq()] = await
 	defer func() {
+		request.GetRequest().Seq = oldSeq
 		close(await)
 		delete(conn.awaitMap, request.GetSeq())
 	}()
@@ -45,7 +47,11 @@ func (conn *Conn) SendRequest(request RequestMessage, response ResponseMessage) 
 	if message == nil {
 		return errors.New("conn close")
 	}
-	return json.Unmarshal(message, response)
+	err := json.Unmarshal(message, response)
+	if err == nil {
+		response.GetResponse().RequestSeq = oldSeq
+	}
+	return err
 }
 
 // 非阻塞，不会拿到结果
