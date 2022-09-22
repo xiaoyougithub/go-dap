@@ -9,13 +9,13 @@ import (
 )
 
 type Conn struct {
-	io       io.ReadWriter
+	io       io.ReadWriteCloser
 	handler  Handler
 	seq      int64
 	awaitMap map[int]chan []byte
 }
 
-func NewConn(io io.ReadWriter, handler Handler) *Conn {
+func NewConn(io io.ReadWriteCloser, handler Handler) *Conn {
 	conn := &Conn{
 		io:       io,
 		handler:  handler,
@@ -88,4 +88,11 @@ func (conn *Conn) Run() {
 		v <- nil
 		delete(conn.awaitMap, k)
 	}
+}
+
+func (conn *Conn) Close() error {
+	if conn.io != nil {
+		return conn.io.Close()
+	}
+	return nil
 }
