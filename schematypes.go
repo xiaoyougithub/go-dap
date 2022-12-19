@@ -607,8 +607,8 @@ func (r *SetBreakpointsRequest) GetRequest() *Request { return &r.Request }
 // SetBreakpointsArguments: Arguments for 'setBreakpoints' request.
 type SetBreakpointsArguments struct {
 	Source         Source             `json:"source"`
-	Breakpoints    []SourceBreakpoint `json:"breakpoints,omitempty"`
-	Lines          []int              `json:"lines,omitempty"`
+	Breakpoints    []SourceBreakpoint `json:"breakpoints"`
+	Lines          []int              `json:"lines"`
 	SourceModified bool               `json:"sourceModified,omitempty"`
 }
 
