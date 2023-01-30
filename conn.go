@@ -64,7 +64,7 @@ func (conn *Conn) Run() {
 	for {
 		content, err := ReadBaseMessage(reader)
 		if err != nil {
-			return
+			break
 		}
 		message, err := DecodeProtocolMessage(content)
 		if err != nil {
