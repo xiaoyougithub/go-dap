@@ -409,6 +409,30 @@ type RunInTerminalResponseBody struct {
 
 func (r *RunInTerminalResponse) GetResponse() *Response { return &r.Response }
 
+// StartDebuggingRequest: This request is sent from the debug adapter to the client to start a new debug session of the same type as the caller.
+// This request should only be sent if the corresponding client capability `supportsStartDebuggingRequest` is true.
+// A client implementation of `startDebugging` should start a new debug session (of the same type as the caller) in the same way that the caller's session was started. If the client supports hierarchical debug sessions, the newly created session can be treated as a child of the caller session.
+type StartDebuggingRequest struct {
+	Request
+
+	Arguments StartDebuggingRequestArguments `json:"arguments"`
+}
+
+func (r *StartDebuggingRequest) GetRequest() *Request { return &r.Request }
+
+// StartDebuggingRequestArguments: Arguments for `startDebugging` request.
+type StartDebuggingRequestArguments struct {
+	Configuration map[string]interface{} `json:"configuration"`
+	Request       string                 `json:"request"`
+}
+
+// StartDebuggingResponse: Response to `startDebugging` request. This is just an acknowledgement, so no body field is required.
+type StartDebuggingResponse struct {
+	Response
+}
+
+func (r *StartDebuggingResponse) GetResponse() *Response { return &r.Response }
+
 // InitializeRequest: The 'initialize' request is sent as the first request from the client to the debug adapter in order to configure it with client capabilities and to retrieve capabilities from the debug adapter. Until the debug adapter has responded to with an 'initialize' response, the client must not send any additional requests or events to the debug adapter. In addition the debug adapter is not allowed to send any requests or events to the client until it has responded with an 'initialize' response. The 'initialize' request may only be sent once.
 type InitializeRequest struct {
 	Request
@@ -420,20 +444,21 @@ func (r *InitializeRequest) GetRequest() *Request { return &r.Request }
 
 // InitializeRequestArguments: Arguments for 'initialize' request.
 type InitializeRequestArguments struct {
-	ClientID                     string `json:"clientID,omitempty"`
-	ClientName                   string `json:"clientName,omitempty"`
-	AdapterID                    string `json:"adapterID"`
-	Locale                       string `json:"locale,omitempty"`
-	LinesStartAt1                bool   `json:"linesStartAt1"`
-	ColumnsStartAt1              bool   `json:"columnsStartAt1"`
-	PathFormat                   string `json:"pathFormat,omitempty"`
-	SupportsVariableType         bool   `json:"supportsVariableType,omitempty"`
-	SupportsVariablePaging       bool   `json:"supportsVariablePaging,omitempty"`
-	SupportsRunInTerminalRequest bool   `json:"supportsRunInTerminalRequest,omitempty"`
-	SupportsMemoryReferences     bool   `json:"supportsMemoryReferences,omitempty"`
-	SupportsProgressReporting    bool   `json:"supportsProgressReporting,omitempty"`
-	SupportsInvalidatedEvent     bool   `json:"supportsInvalidatedEvent,omitempty"`
-	SupportsMemoryEvent          bool   `json:"supportsMemoryEvent,omitempty"`
+	ClientID                      string `json:"clientID,omitempty"`
+	ClientName                    string `json:"clientName,omitempty"`
+	AdapterID                     string `json:"adapterID"`
+	Locale                        string `json:"locale,omitempty"`
+	LinesStartAt1                 bool   `json:"linesStartAt1"`
+	ColumnsStartAt1               bool   `json:"columnsStartAt1"`
+	PathFormat                    string `json:"pathFormat,omitempty"`
+	SupportsVariableType          bool   `json:"supportsVariableType,omitempty"`
+	SupportsVariablePaging        bool   `json:"supportsVariablePaging,omitempty"`
+	SupportsRunInTerminalRequest  bool   `json:"supportsRunInTerminalRequest,omitempty"`
+	SupportsMemoryReferences      bool   `json:"supportsMemoryReferences,omitempty"`
+	SupportsProgressReporting     bool   `json:"supportsProgressReporting,omitempty"`
+	SupportsInvalidatedEvent      bool   `json:"supportsInvalidatedEvent,omitempty"`
+	SupportsMemoryEvent           bool   `json:"supportsMemoryEvent,omitempty"`
+	SupportsStartDebuggingRequest bool   `json:"supportsStartDebuggingRequest,omitempty"`
 }
 
 // InitializeResponse: Response to 'initialize' request.
@@ -1832,8 +1857,9 @@ type InvalidatedAreas string
 // Mapping of request commands and corresponding struct constructors that
 // can be passed to json.Unmarshal.
 var requestCtor = map[string]messageCtor{
-	"cancel":        func() Message { return &CancelRequest{} },
-	"runInTerminal": func() Message { return &RunInTerminalRequest{} },
+	"cancel":         func() Message { return &CancelRequest{} },
+	"runInTerminal":  func() Message { return &RunInTerminalRequest{} },
+	"startDebugging": func() Message { return &StartDebuggingRequest{} },
 	"initialize": func() Message {
 		return &InitializeRequest{
 			Arguments: InitializeRequestArguments{
@@ -1891,6 +1917,7 @@ var requestCtor = map[string]messageCtor{
 var responseCtor = map[string]messageCtor{
 	"cancel":                    func() Message { return &CancelResponse{} },
 	"runInTerminal":             func() Message { return &RunInTerminalResponse{} },
+	"startDebugging":            func() Message { return &StartDebuggingResponse{} },
 	"initialize":                func() Message { return &InitializeResponse{} },
 	"configurationDone":         func() Message { return &ConfigurationDoneResponse{} },
 	"launch":                    func() Message { return &LaunchResponse{} },
