@@ -37,8 +37,6 @@ func (conn *Conn) SendRequest(request RequestMessage, response ResponseMessage) 
 	conn.awaitMap[request.GetSeq()] = await
 	defer func() {
 		request.GetRequest().Seq = oldSeq
-		close(await)
-		delete(conn.awaitMap, request.GetSeq())
 	}()
 	if err := conn.Send(request); err != nil {
 		return err
