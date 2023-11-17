@@ -1,3 +1,3 @@
-module github.com/hongcha98/go-dap
+module github.com/xiaoyougithub/go-dap
 
 go 1.13
